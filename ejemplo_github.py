@@ -1,110 +1,57 @@
-import pygame
-import random
 import numpy as np
-import math
+import pygame
+
+# Inicializar Pygame
 pygame.init()
 
-WIDTH, HEIGHT = 800,800
-WIN = pygame.display.set_mode((WIDTH,HEIGHT))
-pygame.display.set_caption("Simulation")
-WHITE= (255,255,255)
-SAND=(194, 178, 128)
-T=8 #to play with sand size, change the value of T
+# Definir colores
+BLACK = (0, 0, 0)
+SAND = (194, 178, 128)
 
-class Grid:
-    def __init__(self):
-        self.grid=np.zeros((WIDTH*2,HEIGHT+T))
-        self.position=[]
-    
-    def addSand(self,pointX, pointY):
-        if pointX>=0 and pointX<=WIDTH and pointY>=0 and pointY<=HEIGHT:
-            if self.grid[pointX][pointY]==0:
-                self.grid[pointX][pointY]=1
-                self.position.append((pointX,pointY))
-    
-    def update_position(self):
-        for points in self.position:
-            listpoints= list(points)
-            self.position.remove(points)
-            
-            if points[1]>=HEIGHT-T:
-                self.position.append(points)
-            
-            elif self.grid[points[0]][points[1]+T]==0:
-                self.grid[points[0]][points[1]] = 0
-                self.grid[points[0]][points[1]+T] = 1
-                listpoints[1]+=T
-                points= tuple(listpoints)
-                self.position.append(points)
-                
-                
-            elif self.grid[points[0]][points[1]+T]==1:
-                if  (self.grid[points[0]+T][points[1]+T]==1) and (self.grid[points[0]-T][points[1]+T]==1):
-                    self.position.append(points)
-                    
-                elif (self.grid[points[0]+T][points[1]+T]==1) and (self.grid[points[0]-T][points[1]+T]==0):
-                    self.grid[points[0]][points[1]] = 0
-                    self.grid[points[0]-T][points[1]+T] = 1
-                    listpoints[0]-=T
-                    listpoints[1]+=T
-                    points= tuple(listpoints)
-                    self.position.append(points)
-                    
-                elif (self.grid[points[0]+T][points[1]+T]==0) and (self.grid[points[0]-T][points[1]+T]==1):
-                    self.grid[points[0]][points[1]] = 0
-                    self.grid[points[0]+T][points[1]+T] = 1
-                    listpoints[0]+=T
-                    listpoints[1]+=T
-                    points= tuple(listpoints)
-                    self.position.append(points)
-                    
-                else:
-                    self.grid[points[0]][points[1]] = 0
-                    a= random.randint(0,1)
-                    if a==0:
-                        a=-1
-                    self.grid[points[0]+a*T][points[1]+T] = 1
-                    listpoints[0]+=a*T
-                    listpoints[1]+=T
-                    points= tuple(listpoints)
-                    self.position.append(points)
-    
-    def draw(self, win):
-        for points in self.position:
-            #pygame.draw.rect(win, SAND, (points[0],points[1],T,T), 0)       
-            pygame.draw.circle(win, SAND, (points[0],points[1]) , T,3)
-                    
-                    
-    
-        
+# Configurar la ventana y la matriz
+n = 100  # Número de filas
+m = 100  # Número de columnas
+square_size = 8  # Tamaño del cuadrado en píxeles
+width, height = m * square_size, n * square_size
+matrix = np.random.randint(0, 2, size=(n, m))  # Matriz aleatoria de 0s y 1s
 
+screen = pygame.display.set_mode((width, height))
 
-def main():
-    run= True
-    clock= pygame.time.Clock()
-    
-    sandbox= Grid()
-    
-    while run:
-        clock.tick(100)
-        pygame.display.set_caption("Falling Sand - FPS: {}".format(int(clock.get_fps())))
-        WIN.fill((0,0,0))
-        
-        for event in pygame.event.get():
-            if event.type== pygame.QUIT:
-                run= False
-            
-            elif pygame.mouse.get_pressed()[0]:
-                pos=pygame.mouse.get_pos()
-                btn=pygame.mouse
-                sandbox.addSand(pos[0]-pos[0]%T,pos[1]-pos[1]%T)
-        
-        sandbox.update_position()
-        sandbox.draw(WIN)
-        
-                
-               
-        pygame.display.update()
-    pygame.quit()
-    
-main()
+# Función para dibujar la pantalla
+def draw_screen(matrix):
+    for row in range(n):
+        for col in range(m):
+            color = SAND if matrix[row][col] == 1 else BLACK
+            pygame.draw.rect(screen, color, (col * square_size, row * square_size, square_size, square_size))
+
+run = True
+
+while run:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+
+    for i in range(n-1, -1, -1):  # Iterar desde la fila más baja hasta la más alta
+        for j in range(m):
+            if matrix[i, j] != 0:    
+                if i < n-1:  # Comprueba si la celda no está en el borde inferior de la matriz
+                    if matrix[i+1, j] == 0:  # Abajo está libre
+                        matrix[i, j] = 0
+                        matrix[i+1, j] = 1
+                    elif j > 0 and matrix[i+1, j-1] == 0:  # Abajo izquierda está libre
+                        matrix[i, j] = 0
+                        matrix[i+1, j-1] = 1
+                    elif j < m-1 and matrix[i+1, j+1] == 0:  # Abajo derecha está libre
+                        matrix[i, j] = 0
+                        matrix[i+1, j+1] = 1
+
+    # Limpiar la pantalla
+    screen.fill(BLACK)
+
+    # Dibujar la pantalla basada en la matriz
+    draw_screen(matrix)
+
+    # Actualizar la pantalla
+    pygame.display.flip()
+
+pygame.quit()
