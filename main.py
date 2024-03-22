@@ -16,13 +16,14 @@ def draw_mouse_position():
 BLACK = (0, 0, 0)
 SAND = (194, 178, 128)
 RED = (255, 0, 0)
+WATER = (0, 0, 255)
 
 # Configurar la ventana y la matriz
 n = 100  # Número de filas
 m = 100  # Número de columnas
 square_size = 8  # Tamaño del cuadrado en píxeles
 width, height = m * square_size, n * square_size
-#matrix = np.random.randint(0, 2, size=(n, m))  # Matriz aleatoria de 0s y 1s
+#matrix = np.random.randint(0, 3, size=(n, m))  # Matriz aleatoria de 0s y 1s
 matrix = np.zeros((n, m))  # Matriz aleatoria de 0s y 1s
 
 
@@ -32,7 +33,8 @@ screen = pygame.display.set_mode((width, height))
 def draw_screen(matrix):
     for row in range(n):
         for col in range(m):
-            color = SAND if matrix[row][col] == 1 else BLACK
+            #color = SAND if matrix[row][col] == 1 else WATER if matrix[row][col] == 1 else BLACK
+            color = SAND if matrix[row][col] == 1 else WATER if matrix[row][col] == 2 else BLACK
             pygame.draw.rect(screen, color, (col * square_size, row * square_size, square_size, square_size))
 
 
@@ -59,7 +61,7 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-        elif left_mouse_button_pressed:  # Verificar si se ha pulsado el botón izquierdo del ratón
+        if left_mouse_button_pressed:  # Verificar si se ha pulsado el botón izquierdo del ratón
                     mouse_x, mouse_y = event.pos  # Obtener la posición del ratón
                     # print("Posición del ratón (x, y):", mouse_x, ",", mouse_y)
                     celda_j = int(np.floor(mouse_x/square_size))
@@ -69,8 +71,9 @@ while run:
                     if matrix[celda_i, celda_j] == 0:
                         matrix[celda_i, celda_j] = 1
         
+
         # Verificar si se ha pulsado el botón izquierdo del ratón
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 3:  # El botón izquierdo del ratón tiene el código 1
                 print("Se ha pulsado el botón der del ratón")
                 mouse_x, mouse_y = event.pos  # Obtener la posición del ratón
@@ -84,6 +87,20 @@ while run:
                 print("Se ha pulsado la tecla D")
                 generadores.pop()
 
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_a:
+                mouse_x, mouse_y = pygame.mouse.get_pos()  # Obtener la posición del ratón
+                # print("Posición del ratón (x, y):", mouse_x, ",", mouse_y)
+                celda_j = int(np.floor(mouse_x/square_size))
+                celda_i = int(np.floor(mouse_y/square_size))
+                print(f"Agua")
+                
+                if matrix[celda_i, celda_j] == 0:
+                    matrix[celda_i, celda_j] = 2
+
+            
+
+
 
     if frame_count % 5 == 0:
         for coords in generadores:
@@ -94,22 +111,63 @@ while run:
 
     frame_count += 1
 
+    if frame_count%2 == 0:
+        for i in range(n-1, -1, -1):
+            for j in range(m):
+                if matrix[i, j] == 1:
+                    if i < n-1: # La celda no está en el borde inferior de la pantalla
+                        if matrix[i+1, j] == 0: # Abajo libre 
+                            matrix[i, j] = 0
+                            matrix[i+1, j] = 1
 
+                        elif j > 0 and matrix[i+1, j-1] == 0: # Abajo izquierda libre
+                            matrix[i, j] = 0
+                            matrix[i+1, j-1] = 1
+
+                        elif j < m-1 and matrix[i+1, j+1] == 0: # Abajo derecha libre
+                            matrix[i, j] = 0
+                            matrix[i+1, j+1] = 1
+
+                if matrix[i, j] == 2:
+                    if i < n-1: # La celda no está en el borde inferior de la pantalla
+                        if matrix[i+1, j] == 0: # Abajo libre 
+                            matrix[i, j] = 0
+                            matrix[i+1, j] = 2
+
+                        elif j > 0 and matrix[i+1, j-1] == 0: # Abajo izquierda libre
+                            matrix[i, j] = 0
+                            matrix[i+1, j-1] = 2
+
+                        elif j < m-1 and matrix[i+1, j+1] == 0: # Abajo derecha libre
+                            matrix[i, j] = 0
+                            matrix[i+1, j+1] = 2 
+
+                        elif j > 0 and j < m-1 and matrix[i+1, j-1] != 0 and matrix[i+1, j+1] != 0 and matrix[i, j-1] == 0:
+                            rand = np.random.uniform(0, 1)
+                            matrix[i, j] = 0
+                            if rand > 0.5:
+                                matrix[i, j-1] = 2
+                            else:
+                                matrix[i, j+1] = 2
+
+
+    """ 
     for i in range(n-1, -1, -1):
         for j in range(m):
-            if matrix[i, j] != 0:
+            if matrix[i, j] != 2:
                 if i < n-1: # La celda no está en el borde inferior de la pantalla
                     if matrix[i+1, j] == 0: # Abajo libre 
                         matrix[i, j] = 0
-                        matrix[i+1, j] = 1
+                        matrix[i+1, j] = 2
 
                     elif j > 0 and matrix[i+1, j-1] == 0: # Abajo izquierda libre
                         matrix[i, j] = 0
-                        matrix[i+1, j-1] = 1
+                        matrix[i+1, j-1] = 2
 
                     elif j < m-1 and matrix[i+1, j+1] == 0: # Abajo derecha libre
                         matrix[i, j] = 0
-                        matrix[i+1, j+1] = 1
+                        matrix[i+1, j+1] = 2 
+    """
 
 
 
