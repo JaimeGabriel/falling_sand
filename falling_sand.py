@@ -159,11 +159,11 @@ while run:
 
                     elif j > 0 and matrix[i+1, j-1] == 0: # Down left free
                         matrix[i, j] = 0
-                        matrix[i+1, j-1] = 1
+                        matrix[i+1, j-1] = 2
 
                     elif j < m-1 and matrix[i+1, j+1] == 0: # Down right free
                         matrix[i, j] = 0
-                        matrix[i+1, j+1] = 1
+                        matrix[i+1, j+1] = 2
 
                     """ elif j > 0 and matrix[i, j-1] == 0: # Left free
                         matrix[i, j] = 0
