@@ -138,7 +138,7 @@ while run:
     for i in range(n-1, -1, -1):
         for j in range(m):
             if matrix[i, j] == 1: # Sand
-                if i < n-1: # The cell of not at the border
+                if i < n-1: # The cell is not at the bottom border
                     if matrix[i+1, j] == 0: # Down free
                         matrix[i, j] = 0
                         matrix[i+1, j] = 1
@@ -152,20 +152,37 @@ while run:
                         matrix[i+1, j+1] = 1
 
             if matrix[i, j] == 2: # Water
-                if i < n-1: # The cell of not at the border
+                if i < n-1: # The cell is not at the bottom border
                     if matrix[i+1, j] == 0: # Abajo libre 
                         matrix[i, j] = 0
                         matrix[i+1, j] = 2
 
                     elif j > 0 and matrix[i+1, j-1] == 0: # Down left free
                         matrix[i, j] = 0
-                        matrix[i+1, j-1] = 2
+                        matrix[i+1, j-1] = 1
 
                     elif j < m-1 and matrix[i+1, j+1] == 0: # Down right free
                         matrix[i, j] = 0
-                        matrix[i+1, j+1] = 2
+                        matrix[i+1, j+1] = 1
 
-                else:
+                    """ elif j > 0 and matrix[i, j-1] == 0: # Left free
+                        matrix[i, j] = 0
+                        matrix[i, j-1] = 2
+
+                    elif j < m-1 and matrix[i, j+1] == 0: # Right free
+                        matrix[i, j] = 0
+                        matrix[i+1, j+1] = 2 """
+
+                    """ elif j < m - 1: 
+                        rand = np.random.uniform(0, 1)
+                        matrix[i, j] = 0
+                        if rand > 0.5:
+                            matrix[i, j-1] = 2
+                        else:
+                            matrix[i, j+1] = 2 """
+
+
+                """ else:
                     if j > 0 and j < m - 1 and matrix[i, j-1] == 0 and matrix[i, j+1] == 0:
                         rand = np.random.uniform(0, 1)
                         if rand < 0.5:
@@ -175,15 +192,15 @@ while run:
                             matrix[i, j] = 0
                             matrix[i, j+1] = 2 
 
-                    elif j > 0 and matrix[i, j-1] == 0 or j > 0 and matrix[i, j-1] == 1: 
+                    if j > 0 and matrix[i, j-1] == 0: 
                         matrix[i, j] = 0
                         matrix[i, j-1] = 2
 
-                    elif j < m-1 and matrix[i, j+1] == 0 or j < m-1 and matrix[i, j+1] == 1: 
+                    if j < m-1 and matrix[i, j+1] == 0: 
                         matrix[i, j] = 0
-                        matrix[i, j+1] = 2 
+                        matrix[i, j+1] = 2  """
 
-                    """ elif j > 0 and j < m-1 and matrix[i+1, j-1] != 0 and matrix[i+1, j+1] != 0 and matrix[i, j-1] == 0:
+                """ elif j > 0 and j < m-1 and matrix[i+1, j-1] != 0 and matrix[i+1, j+1] != 0 and matrix[i, j-1] == 0:
                         rand = np.random.uniform(0, 1)
                         matrix[i, j] = 0
                         if rand > 0.5:
@@ -191,20 +208,20 @@ while run:
                         else:
                             matrix[i, j+1] = 2 """
 
-    # Limpiar la pantalla
+    # Clean screen
     screen.fill(BLACK)
 
-        # Dibujar la pantalla basada en la matriz
+    # Draw screen with the info of the matrix
     draw_screen(matrix)
 
-    # Dibujar la posición del ratón
+    # Draw th mouse position
     draw_mouse_position()
 
-    # Dibujar el menú
+    # Draw the right menu
     for item in menu_items:
         item.draw_menu(screen)
 
-    # Actualizar la pantalla
+    # Update screen
     pygame.display.flip()
 
 pygame.quit()
