@@ -1,44 +1,73 @@
 import pygame
-import numpy as np
 import sys
 
 # Inicializar Pygame
 pygame.init()
 
-# Configurar la ventana y la matriz
-n = 5  # Número de filas
-m = 5  # Número de columnas
-square_size = 50  # Tamaño del cuadrado en píxeles
-width, height = m * square_size, n * square_size
-matrix = np.random.randint(0, 2, size=(n, m))  # Matriz aleatoria de 0s y 1s
-
 # Definir colores
-BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
 
-# Crear la ventana
-screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Representación de pantalla con matriz")
+# Dimensiones de la pantalla
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
 
-# Función para dibujar la pantalla
-def draw_screen(matrix):
-    for row in range(n):
-        for col in range(m):
-            color = WHITE if matrix[row][col] == 1 else BLACK
-            pygame.draw.rect(screen, color, (col * square_size, row * square_size, square_size, square_size))
+class MenuItem:
+    def __init__(self, color, text, position):
+        self.color = color
+        self.text = text
+        self.position = position
 
-# Loop principal
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+    def draw(self, surface):
+        pygame.draw.rect(surface, self.color, self.position)  # Dibujar el cuadrado
+        font = pygame.font.Font(None, 36)
+        text_surface = font.render(self.text, True, BLACK)  # Renderizar el texto
+        text_rect = text_surface.get_rect(center=self.position.center)
+        surface.blit(text_surface, text_rect)  # Dibujar el texto
 
-    # Limpiar la pantalla
-    screen.fill(BLACK)
+def main():
+    # Configurar la pantalla
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("Menú Pygame")
+    
+    # Crear elementos del menú
+    menu_items = [
+        MenuItem(RED, "Opción 1", pygame.Rect(550, 100, 200, 50)),
+        MenuItem(GREEN, "Opción 2", pygame.Rect(550, 200, 200, 50)),
+        MenuItem(BLUE, "Opción 3", pygame.Rect(550, 300, 200, 50))
+    ]
+    
+    selected_option = None
+    
+    # Bucle principal
+    while True:
+        screen.fill(WHITE)  # Limpiar la pantalla
+        
+        # Manejar eventos
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                for item in menu_items:
+                    if item.position.collidepoint(event.pos):
+                        selected_option = item.text
+        
+        # Dibujar el menú
+        for item in menu_items:
+            item.draw(screen)
+        
+        # Dibujar la variable seleccionada
+        if selected_option:
+            font = pygame.font.Font(None, 48)
+            text_surface = font.render("Seleccionado: " + selected_option, True, BLACK)
+            text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, 500))
+            screen.blit(text_surface, text_rect)
+        
+        pygame.display.flip()  # Actualizar la pantalla
 
-    # Dibujar la pantalla basada en la matriz
-    draw_screen(matrix)
-
-    # Actualizar la pantalla
-    pygame.display.flip()
+if __name__ == "__main__":
+    main()

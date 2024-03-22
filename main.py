@@ -74,7 +74,7 @@ while run:
 
         # Verificar si se ha pulsado el botón izquierdo del ratón
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 3:  # El botón izquierdo del ratón tiene el código 1
+            if event.button == 3:  
                 print("Se ha pulsado el botón der del ratón")
                 mouse_x, mouse_y = event.pos  # Obtener la posición del ratón
                 celda_j = int(np.floor(mouse_x/square_size))
