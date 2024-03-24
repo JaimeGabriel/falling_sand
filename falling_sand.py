@@ -3,8 +3,8 @@ import pygame
 
 
 n = 100 # Rows of the matrix
-m = 100 # Columns of the matrix
-square_size = 8 # Number of pixel of the cells
+m = 150 # Columns of the matrix
+square_size = 8 # Number of pixel for a cell
 width, height = m * square_size, n * square_size # Number of pixels of the game window
 #matrix = np.random.randint(0, 3, size=(n, m))  # 
 matrix = np.zeros((n, m)) 
@@ -22,7 +22,7 @@ def draw_mouse_position():
     Function that gets and draws the position of the mouse at all time.
     '''
     mouse_x, mouse_y = pygame.mouse.get_pos()
-    pygame.draw.circle(screen, RED, (mouse_x, mouse_y), 5) 
+    pygame.draw.circle(screen, RED, (mouse_x, mouse_y), brush_size * square_size) 
 
 
 def draw_screen(matrix):
@@ -56,14 +56,27 @@ class MenuItem:
         surface.blit(text_surface, text_rect)
 
 
-menu_items = [
-    MenuItem(1, SAND, 'Sand', pygame.Rect(550, 100, 200, 50)),
-    MenuItem(2, WATER, 'Water', pygame.Rect(550, 200, 200, 50)),
-    MenuItem(0, WHITE, 'Delete', pygame.Rect(550, 300, 200, 50))
+material_item_menu_width = 100
+material_item_menu_height = 50
+brush_size_item_menu_width = 30
+brush_size_item_menu_width = 30
+
+material_menu_items = [
+    MenuItem(1, SAND, 'Sand', pygame.Rect(width - material_item_menu_width*1.5, material_item_menu_height*1.5, material_item_menu_width, material_item_menu_height)),
+    MenuItem(2, WATER, 'Water', pygame.Rect(width - material_item_menu_width*1.5, material_item_menu_height*3, material_item_menu_width, material_item_menu_height)),
+    MenuItem(0, WHITE, 'Delete', pygame.Rect(width - material_item_menu_width*1.5, material_item_menu_height*4.5, material_item_menu_width, material_item_menu_height)),  
+]
+
+brush_size_menu_items = [
+    MenuItem(1, WHITE, '1', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*1.5, brush_size_item_menu_width, brush_size_item_menu_width)),
+    MenuItem(10, WHITE, '10', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*2.5, brush_size_item_menu_width, brush_size_item_menu_width)),
+    MenuItem(25, WHITE, '25', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*3.5, brush_size_item_menu_width, brush_size_item_menu_width)),
+    MenuItem(50, WHITE, '50', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*4.5, brush_size_item_menu_width, brush_size_item_menu_width)),
+    MenuItem(100, WHITE, '100', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*5.5, brush_size_item_menu_width, brush_size_item_menu_width))
 ]
 
 selected_material = 1
-
+brush_size = 1
 
 pygame.init()
 screen = pygame.display.set_mode((width, height))
@@ -88,21 +101,29 @@ while run:
             run = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            for item in menu_items:
+            for item in material_menu_items:
                 if item.position.collidepoint(event.pos):
                     selected_material = item.value
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            for item in brush_size_menu_items:
+                if item.position.collidepoint(event.pos):
+                    brush_size = item.value
 
         if is_left_mouse_button_pressed(): # Left mouse button
             '''
             Left mouse button to create a block.
             ''' 
-            mouse_x, mouse_y = event.pos 
+            mouse_x, mouse_y = pygame.mouse.get_pos()
             # print("Posición del ratón (x, y):", mouse_x, ",", mouse_y)
             cell_j = int(np.floor(mouse_x/square_size))
             cell_i = int(np.floor(mouse_y/square_size))
             print(f"Se ha pulsado la celda ({cell_i}, {cell_j})")
             
-            matrix[cell_i, cell_j] = selected_material
+            for i in range(cell_i - brush_size, cell_i + brush_size):
+                for j in range(cell_j - brush_size, cell_j + brush_size):
+                    if i > 0 and i < n and j > 0 and j < m:
+                        matrix[i, j] = selected_material
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             '''
@@ -139,75 +160,53 @@ while run:
         for j in range(m):
             if matrix[i, j] == 1: # Sand
                 if i < n-1: # The cell is not at the bottom border
-                    if matrix[i+1, j] == 0: # Down free
+                    if matrix[i+1, j] == 0: # Bottom free
                         matrix[i, j] = 0
                         matrix[i+1, j] = 1
 
-                    elif j > 0 and matrix[i+1, j-1] == 0: # Down left free
+                    elif j > 0 and matrix[i+1, j-1] == 0: # Botton left free
                         matrix[i, j] = 0
                         matrix[i+1, j-1] = 1
 
-                    elif j < m-1 and matrix[i+1, j+1] == 0: # Down right free
+                    elif j < m-1 and matrix[i+1, j+1] == 0: # Bottom right free
                         matrix[i, j] = 0
                         matrix[i+1, j+1] = 1
 
+                    # Interaction with water
+                    elif matrix[i+1, j] == 2 and frame_count%3 == 0: # Bottom free
+                        matrix[i, j] = 2
+                        matrix[i+1, j] = 1
+
+
             if matrix[i, j] == 2: # Water
                 if i < n-1: # The cell is not at the bottom border
-                    if matrix[i+1, j] == 0: # Abajo libre 
+                    if matrix[i+1, j] == 0: # Bottom free 
                         matrix[i, j] = 0
                         matrix[i+1, j] = 2
 
-                    elif j > 0 and matrix[i+1, j-1] == 0: # Down left free
+                    elif j > 0 and matrix[i+1, j-1] == 0: # Bottom left free
                         matrix[i, j] = 0
                         matrix[i+1, j-1] = 2
 
-                    elif j < m-1 and matrix[i+1, j+1] == 0: # Down right free
+                    elif j < m-1 and matrix[i+1, j+1] == 0: # Botton right free
                         matrix[i, j] = 0
                         matrix[i+1, j+1] = 2
 
-                    """ elif j > 0 and matrix[i, j-1] == 0: # Left free
+                    elif j > 0 and j < m-1 and matrix[i, j-1] == 0 and matrix[i, j+1] == 0: # Bottom occupied and both sides free
+                        matrix[i, j] = 0
+                        rand = np.random.choice([1, -1])
+                        matrix[i, j+rand] = 2
+
+                    elif j > 0 and j < m-1 and matrix[i, j+1] == 0: # Bottom occupied and right free
+                        matrix[i, j] = 0
+                        matrix[i, j+1] = 2
+
+                    elif j > 0 and j < m-1 and matrix[i, j-1] == 0: # Bottom occupied and left free
                         matrix[i, j] = 0
                         matrix[i, j-1] = 2
+                    
 
-                    elif j < m-1 and matrix[i, j+1] == 0: # Right free
-                        matrix[i, j] = 0
-                        matrix[i+1, j+1] = 2 """
-
-                    """ elif j < m - 1: 
-                        rand = np.random.uniform(0, 1)
-                        matrix[i, j] = 0
-                        if rand > 0.5:
-                            matrix[i, j-1] = 2
-                        else:
-                            matrix[i, j+1] = 2 """
-
-
-                """ else:
-                    if j > 0 and j < m - 1 and matrix[i, j-1] == 0 and matrix[i, j+1] == 0:
-                        rand = np.random.uniform(0, 1)
-                        if rand < 0.5:
-                            matrix[i, j] = 0
-                            matrix[i, j-1] = 2
-                        else:
-                            matrix[i, j] = 0
-                            matrix[i, j+1] = 2 
-
-                    if j > 0 and matrix[i, j-1] == 0: 
-                        matrix[i, j] = 0
-                        matrix[i, j-1] = 2
-
-                    if j < m-1 and matrix[i, j+1] == 0: 
-                        matrix[i, j] = 0
-                        matrix[i, j+1] = 2  """
-
-                """ elif j > 0 and j < m-1 and matrix[i+1, j-1] != 0 and matrix[i+1, j+1] != 0 and matrix[i, j-1] == 0:
-                        rand = np.random.uniform(0, 1)
-                        matrix[i, j] = 0
-                        if rand > 0.5:
-                            matrix[i, j-1] = 2
-                        else:
-                            matrix[i, j+1] = 2 """
-
+                    
     # Clean screen
     screen.fill(BLACK)
 
@@ -218,8 +217,12 @@ while run:
     draw_mouse_position()
 
     # Draw the right menu
-    for item in menu_items:
+    for item in material_menu_items:
         item.draw_menu(screen)
+
+    for item in brush_size_menu_items:
+        item.draw_menu(screen)
+
 
     # Update screen
     pygame.display.flip()
