@@ -69,10 +69,11 @@ material_menu_items = [
 
 brush_size_menu_items = [
     MenuItem(1, WHITE, '1', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*1.5, brush_size_item_menu_width, brush_size_item_menu_width)),
-    MenuItem(10, WHITE, '10', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*2.5, brush_size_item_menu_width, brush_size_item_menu_width)),
-    MenuItem(25, WHITE, '25', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*3.5, brush_size_item_menu_width, brush_size_item_menu_width)),
-    MenuItem(50, WHITE, '50', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*4.5, brush_size_item_menu_width, brush_size_item_menu_width)),
-    MenuItem(100, WHITE, '100', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*5.5, brush_size_item_menu_width, brush_size_item_menu_width))
+    MenuItem(5, WHITE, '5', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*2.5, brush_size_item_menu_width, brush_size_item_menu_width)),
+    MenuItem(10, WHITE, '10', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*3.5, brush_size_item_menu_width, brush_size_item_menu_width)),
+    MenuItem(25, WHITE, '25', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*4.5, brush_size_item_menu_width, brush_size_item_menu_width)),
+    MenuItem(50, WHITE, '50', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*5.5, brush_size_item_menu_width, brush_size_item_menu_width)),
+    MenuItem(100, WHITE, '100', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*6.5, brush_size_item_menu_width, brush_size_item_menu_width))
 ]
 
 selected_material = 1
@@ -86,6 +87,7 @@ generators = []
 frame_count = 0
 
 run = True
+paused = False
 
 while run:
 
@@ -119,11 +121,13 @@ while run:
             cell_j = int(np.floor(mouse_x/square_size))
             cell_i = int(np.floor(mouse_y/square_size))
             print(f"Se ha pulsado la celda ({cell_i}, {cell_j})")
-            
+
+
             for i in range(cell_i - brush_size, cell_i + brush_size):
                 for j in range(cell_j - brush_size, cell_j + brush_size):
                     if i > 0 and i < n and j > 0 and j < m:
                         matrix[i, j] = selected_material
+
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             '''
@@ -143,6 +147,9 @@ while run:
             if event.key == pygame.K_d and len(generators) != 0:
                 print("Se ha pulsado la tecla D")
                 generators.pop()
+
+            if event.key == pygame.K_SPACE:
+                paused = not paused
         
     if frame_count % 5 == 0:
         ''''
@@ -156,54 +163,55 @@ while run:
     frame_count += 1
 
     
-    for i in range(n-1, -1, -1):
-        for j in range(m):
-            if matrix[i, j] == 1: # Sand
-                if i < n-1: # The cell is not at the bottom border
-                    if matrix[i+1, j] == 0: # Bottom free
-                        matrix[i, j] = 0
-                        matrix[i+1, j] = 1
+    if not paused:
+        for i in range(n-1, -1, -1):
+            for j in range(m):
+                if matrix[i, j] == 1: # Sand
+                    if i < n-1: # The cell is not at the bottom border
+                        if matrix[i+1, j] == 0: # Bottom free
+                            matrix[i, j] = 0
+                            matrix[i+1, j] = 1
 
-                    elif j > 0 and matrix[i+1, j-1] == 0: # Botton left free
-                        matrix[i, j] = 0
-                        matrix[i+1, j-1] = 1
+                        elif j > 0 and matrix[i+1, j-1] == 0: # Botton left free
+                            matrix[i, j] = 0
+                            matrix[i+1, j-1] = 1
 
-                    elif j < m-1 and matrix[i+1, j+1] == 0: # Bottom right free
-                        matrix[i, j] = 0
-                        matrix[i+1, j+1] = 1
+                        elif j < m-1 and matrix[i+1, j+1] == 0: # Bottom right free
+                            matrix[i, j] = 0
+                            matrix[i+1, j+1] = 1
 
-                    # Interaction with water
-                    elif matrix[i+1, j] == 2 and frame_count%3 == 0: # Bottom free
-                        matrix[i, j] = 2
-                        matrix[i+1, j] = 1
+                        # Interaction with water
+                        elif matrix[i+1, j] == 2 and frame_count%3 == 0: # Bottom free
+                            matrix[i, j] = 2
+                            matrix[i+1, j] = 1
 
 
-            if matrix[i, j] == 2: # Water
-                if i < n-1: # The cell is not at the bottom border
-                    if matrix[i+1, j] == 0: # Bottom free 
-                        matrix[i, j] = 0
-                        matrix[i+1, j] = 2
+                if matrix[i, j] == 2: # Water
+                    if i < n-1: # The cell is not at the bottom border
+                        if matrix[i+1, j] == 0: # Bottom free 
+                            matrix[i, j] = 0
+                            matrix[i+1, j] = 2
 
-                    elif j > 0 and matrix[i+1, j-1] == 0: # Bottom left free
-                        matrix[i, j] = 0
-                        matrix[i+1, j-1] = 2
+                        elif j > 0 and matrix[i+1, j-1] == 0: # Bottom left free
+                            matrix[i, j] = 0
+                            matrix[i+1, j-1] = 2
 
-                    elif j < m-1 and matrix[i+1, j+1] == 0: # Botton right free
-                        matrix[i, j] = 0
-                        matrix[i+1, j+1] = 2
+                        elif j < m-1 and matrix[i+1, j+1] == 0: # Botton right free
+                            matrix[i, j] = 0
+                            matrix[i+1, j+1] = 2
 
-                    elif j > 0 and j < m-1 and matrix[i, j-1] == 0 and matrix[i, j+1] == 0: # Bottom occupied and both sides free
-                        matrix[i, j] = 0
-                        rand = np.random.choice([1, -1])
-                        matrix[i, j+rand] = 2
+                        elif j > 0 and j < m-1 and matrix[i, j-1] == 0 and matrix[i, j+1] == 0: # Bottom occupied and both sides free
+                            matrix[i, j] = 0
+                            rand = np.random.choice([1, -1])
+                            matrix[i, j+rand] = 2
 
-                    elif j > 0 and j < m-1 and matrix[i, j+1] == 0: # Bottom occupied and right free
-                        matrix[i, j] = 0
-                        matrix[i, j+1] = 2
+                        elif j > 0 and j < m-1 and matrix[i, j+1] == 0: # Bottom occupied and right free
+                            matrix[i, j] = 0
+                            matrix[i, j+1] = 2
 
-                    elif j > 0 and j < m-1 and matrix[i, j-1] == 0: # Bottom occupied and left free
-                        matrix[i, j] = 0
-                        matrix[i, j-1] = 2
+                        elif j > 0 and j < m-1 and matrix[i, j-1] == 0: # Bottom occupied and left free
+                            matrix[i, j] = 0
+                            matrix[i, j-1] = 2
                     
 
                     
@@ -212,6 +220,13 @@ while run:
 
     # Draw screen with the info of the matrix
     draw_screen(matrix)
+
+    if paused:
+        # Mostrar un mensaje de pausa en la pantalla si está pausado
+        font = pygame.font.Font(None, 36)
+        text = font.render("JUEGO EN PAUSA", True, WHITE)
+        text_rect = text.get_rect(center=(width // 2, height * 0.1))
+        screen.blit(text, text_rect)
 
     # Draw th mouse position
     draw_mouse_position()
