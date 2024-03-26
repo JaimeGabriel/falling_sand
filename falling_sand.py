@@ -3,7 +3,7 @@ import pygame
 
 
 n = 100 # Rows of the matrix
-m = 150 # Columns of the matrix
+m = 100 # Columns of the matrix
 square_size = 8 # Number of pixel for a cell
 width, height = m * square_size, n * square_size # Number of pixels of the game window
 #matrix = np.random.randint(0, 3, size=(n, m))  # 
@@ -181,7 +181,7 @@ while run:
                             matrix[i+1, j+1] = 1
 
                         # Interaction with water
-                        elif matrix[i+1, j] == 2 and frame_count%3 == 0: # Bottom free
+                        elif matrix[i+1, j] == 2 and frame_count%3 == 0: # Bottom has water
                             matrix[i, j] = 2
                             matrix[i+1, j] = 1
 
