@@ -13,6 +13,7 @@ BLACK = (0, 0, 0)
 SAND = (194, 178, 128)
 RED = (255, 0, 0)
 WATER = (0, 0, 255)
+ROCK = (128, 128, 128)
 WHITE = (255, 255, 255)
 
 
@@ -32,8 +33,19 @@ def draw_screen(matrix):
     for row in range(n):
 
         for col in range(m):
-            color = SAND if matrix[row][col] == 1 else WATER if matrix[row][col] == 2 else BLACK
+            color = SAND if matrix[row][col] == 1 else WATER if matrix[row][col] == 2 else ROCK if matrix[row][col] == 3 else BLACK
             pygame.draw.rect(screen, color, (col * square_size, row * square_size, square_size, square_size))
+
+def random_index(m):
+    '''
+    Returns a random ordered list of numbers from 0 to m
+    '''
+
+    # Generar índices de columnas
+    column_indices = list(range(m))
+    np.random.shuffle(column_indices)  # Barajar los índices
+
+    return column_indices
 
 
 def is_left_mouse_button_pressed():
@@ -64,14 +76,15 @@ brush_size_item_menu_width = 30
 material_menu_items = [
     MenuItem(1, SAND, 'Sand', pygame.Rect(width - material_item_menu_width*1.5, material_item_menu_height*1.5, material_item_menu_width, material_item_menu_height)),
     MenuItem(2, WATER, 'Water', pygame.Rect(width - material_item_menu_width*1.5, material_item_menu_height*3, material_item_menu_width, material_item_menu_height)),
-    MenuItem(0, WHITE, 'Delete', pygame.Rect(width - material_item_menu_width*1.5, material_item_menu_height*4.5, material_item_menu_width, material_item_menu_height)),  
+    MenuItem(3, ROCK, 'Rock', pygame.Rect(width - material_item_menu_width*1.5, material_item_menu_height*4.5, material_item_menu_width, material_item_menu_height)),
+    MenuItem(0, WHITE, 'Delete', pygame.Rect(width - material_item_menu_width*1.5, material_item_menu_height*6, material_item_menu_width, material_item_menu_height)),  
 ]
 
 brush_size_menu_items = [
     MenuItem(1, WHITE, '1', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*1.5, brush_size_item_menu_width, brush_size_item_menu_width)),
-    MenuItem(5, WHITE, '5', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*2.5, brush_size_item_menu_width, brush_size_item_menu_width)),
-    MenuItem(10, WHITE, '10', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*3.5, brush_size_item_menu_width, brush_size_item_menu_width)),
-    MenuItem(25, WHITE, '25', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*4.5, brush_size_item_menu_width, brush_size_item_menu_width)),
+    MenuItem(2, WHITE, '2', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*2.5, brush_size_item_menu_width, brush_size_item_menu_width)),
+    MenuItem(5, WHITE, '5', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*3.5, brush_size_item_menu_width, brush_size_item_menu_width)),
+    MenuItem(10, WHITE, '10', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*4.5, brush_size_item_menu_width, brush_size_item_menu_width)),
     MenuItem(50, WHITE, '50', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*5.5, brush_size_item_menu_width, brush_size_item_menu_width)),
     MenuItem(100, WHITE, '100', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*6.5, brush_size_item_menu_width, brush_size_item_menu_width))
 ]
@@ -120,13 +133,15 @@ while run:
             # print("Posición del ratón (x, y):", mouse_x, ",", mouse_y)
             cell_j = int(np.floor(mouse_x/square_size))
             cell_i = int(np.floor(mouse_y/square_size))
-            print(f"Se ha pulsado la celda ({cell_i}, {cell_j})")
+            # print(f"Se ha pulsado la celda ({cell_i}, {cell_j})")
 
-
-            for i in range(cell_i - brush_size, cell_i + brush_size):
-                for j in range(cell_j - brush_size, cell_j + brush_size):
-                    if i > 0 and i < n and j > 0 and j < m:
-                        matrix[i, j] = selected_material
+            if brush_size == 1:
+                matrix[cell_i, cell_j] = selected_material
+            else:
+                for i in range(cell_i - brush_size, cell_i + brush_size):
+                    for j in range(cell_j - brush_size, cell_j + brush_size):
+                        if i > 0 and i < n and j > 0 and j < m and np.random.uniform(0, 1) > 0.80:
+                            matrix[i, j] = selected_material
 
 
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -150,6 +165,9 @@ while run:
 
             if event.key == pygame.K_SPACE:
                 paused = not paused
+
+            if event.key == pygame.K_v:
+                matrix = np.flip(np.flip(matrix, axis=1), axis=0)
         
     if frame_count % 5 == 0:
         ''''
@@ -162,10 +180,12 @@ while run:
         frame_count = 0
     frame_count += 1
 
+
+    
     
     if not paused:
-        for i in range(n-1, -1, -1):
-            for j in range(m):
+        for i in range(n-1, -1, -1): # from n - 1 to 0
+            for j in random_index(m): # from 0 to m - 1, but unordered, to avoid the deviation of the water
                 if matrix[i, j] == 1: # Sand
                     if i < n-1: # The cell is not at the bottom border
                         if matrix[i+1, j] == 0: # Bottom free
