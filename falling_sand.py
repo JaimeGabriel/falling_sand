@@ -23,7 +23,8 @@ def draw_mouse_position():
     Function that gets and draws the position of the mouse at all time.
     '''
     mouse_x, mouse_y = pygame.mouse.get_pos()
-    pygame.draw.circle(screen, RED, (mouse_x, mouse_y), brush_size * square_size) 
+    if mouse_x > 0 and mouse_x < width - 1 and mouse_y > 0 and mouse_y < height - 1:
+        pygame.draw.circle(screen, RED, (mouse_x, mouse_y), brush_size * square_size) 
 
 
 def draw_screen(matrix):
@@ -101,6 +102,7 @@ frame_count = 0
 
 run = True
 paused = False
+draw_mouse = False
 
 while run:
 
@@ -168,6 +170,9 @@ while run:
 
             if event.key == pygame.K_v:
                 matrix = np.flip(np.flip(matrix, axis=1), axis=0)
+
+            if event.key == pygame.K_m:
+                draw_mouse = not draw_mouse
         
     if frame_count % 5 == 0:
         ''''
@@ -249,7 +254,8 @@ while run:
         screen.blit(text, text_rect)
 
     # Draw th mouse position
-    draw_mouse_position()
+    if draw_mouse == True:
+        draw_mouse_position()
 
     # Draw the right menu
     for item in material_menu_items:
