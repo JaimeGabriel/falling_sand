@@ -58,15 +58,35 @@ class MenuItem:
     def __init__(self, value, color, text, position):
         self.value = value
         self.color = color
+        self.original_color = color
         self.text = text
         self.position = position
 
-    def draw_menu(self, surface):
-        pygame.draw.rect(surface, self.color, self.position)  
+    def draw_menu(self, surface, is_pressed = False):
+        '''
+        Draw the menu. The color of the buttons changes when they are pressed
+        '''
+        if is_pressed: 
+            pressed_color = tuple(max(0, c - 50) for c in self.color)  
+            pygame.draw.rect(surface, pressed_color, self.position)
+        else: 
+            pygame.draw.rect(surface, self.color, self.position)
         font = pygame.font.Font(None, 36)
         text_surface = font.render(self.text, True, BLACK)
         text_rect = text_surface.get_rect(center=self.position.center)
         surface.blit(text_surface, text_rect)
+
+    def set_pressed_color(self):  
+        '''
+        Set how the color of a button changes when pressed
+        '''
+        self.color = tuple(max(0, c - 50) for c in self.original_color)
+
+    def reset_color(self):  
+        '''
+        Change the color of a button back to normal when is no longer pressed
+        '''
+        self.color = self.original_color
 
 
 material_item_menu_width = 100
@@ -118,16 +138,31 @@ while run:
             run = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
+            '''
+            Check is the material menu was clicked
+            '''
             for item in material_menu_items:
                 if item.position.collidepoint(event.pos):
                     selected_material = item.value
+                    item.set_pressed_color()
 
         if event.type == pygame.MOUSEBUTTONDOWN:
+            '''
+            Check is the brush size menu was clicked
+            '''
             for item in brush_size_menu_items:
                 if item.position.collidepoint(event.pos):
                     brush_size = item.value
+                    item.set_pressed_color()
 
-        if is_left_mouse_button_pressed(): # Left mouse button
+        if event.type == pygame.MOUSEBUTTONUP:
+            '''
+            If the mouse button is no longer pressed, the color of the menu goes back to normal
+            '''
+            for item in material_menu_items + brush_size_menu_items:
+                item.reset_color()
+
+        if is_left_mouse_button_pressed()and not any(item.position.collidepoint(pygame.mouse.get_pos()) for item in material_menu_items + brush_size_menu_items): # Left mouse button pressed outside the menu
             '''
             Left mouse button to create a block.
             ''' 
