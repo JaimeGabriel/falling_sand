@@ -196,7 +196,6 @@ while run:
             D key to eliminate the last generator created.
             ''' 
             if event.key == pygame.K_d and len(generators) != 0:
-                print("Se ha pulsado la tecla D")
                 generators.pop()
 
             if event.key == pygame.K_SPACE:
