@@ -106,8 +106,7 @@ brush_size_menu_items = [
     MenuItem(2, WHITE, '2', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*2.5, brush_size_item_menu_width, brush_size_item_menu_width)),
     MenuItem(5, WHITE, '5', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*3.5, brush_size_item_menu_width, brush_size_item_menu_width)),
     MenuItem(10, WHITE, '10', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*4.5, brush_size_item_menu_width, brush_size_item_menu_width)),
-    MenuItem(50, WHITE, '50', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*5.5, brush_size_item_menu_width, brush_size_item_menu_width)),
-    MenuItem(100, WHITE, '100', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*6.5, brush_size_item_menu_width, brush_size_item_menu_width))
+    MenuItem(50, WHITE, '50', pygame.Rect(width - brush_size_item_menu_width*1.5, material_item_menu_height*5.5, brush_size_item_menu_width, brush_size_item_menu_width))
 ]
 
 selected_material = 1
@@ -232,6 +231,17 @@ while run:
                             matrix[i, j] = 0
                             matrix[i+1, j] = 1
 
+                        elif j > 0 and i < n - 2 and matrix[i+1, j-1] == 0 and matrix[i+1, j+1] == 0: # Botton left and right free
+                            matrix[i, j] = 0
+                            if np.random.uniform(0, 1) > 0.5:
+                                matrix[i+1, j-1] = 1
+                            else: 
+                                matrix[i+1, j+1] = 1
+
+                        elif j < m-1 and matrix[i+1, j+1] == 0: # Bottom right free
+                            matrix[i, j] = 0
+                            matrix[i+1, j+1] = 1
+
                         elif j > 0 and matrix[i+1, j-1] == 0: # Botton left free
                             matrix[i, j] = 0
                             matrix[i+1, j-1] = 1
@@ -247,31 +257,30 @@ while run:
 
 
                 if matrix[i, j] == 2: # Water
-                    if i < n-1: # The cell is not at the bottom border
-                        if matrix[i+1, j] == 0: # Bottom free 
-                            matrix[i, j] = 0
-                            matrix[i+1, j] = 2
+                    if i < n-1 and matrix[i+1, j] == 0: # Bottom free 
+                        matrix[i, j] = 0
+                        matrix[i+1, j] = 2
 
-                        elif j > 0 and matrix[i+1, j-1] == 0: # Bottom left free
-                            matrix[i, j] = 0
-                            matrix[i+1, j-1] = 2
+                    elif i < n-1 and j > 0 and matrix[i+1, j-1] == 0: # Bottom left free
+                        matrix[i, j] = 0
+                        matrix[i+1, j-1] = 2
 
-                        elif j < m-1 and matrix[i+1, j+1] == 0: # Botton right free
-                            matrix[i, j] = 0
-                            matrix[i+1, j+1] = 2
+                    elif i < n-1 and j < m-1 and matrix[i+1, j+1] == 0: # Botton right free
+                        matrix[i, j] = 0
+                        matrix[i+1, j+1] = 2
 
-                        elif j > 0 and j < m-1 and matrix[i, j-1] == 0 and matrix[i, j+1] == 0: # Bottom occupied and both sides free
-                            matrix[i, j] = 0
-                            rand = np.random.choice([1, -1])
-                            matrix[i, j+rand] = 2
+                    elif j > 0 and j < m-1 and matrix[i, j-1] == 0 and matrix[i, j+1] == 0: # Bottom occupied and both sides free
+                        matrix[i, j] = 0
+                        rand = np.random.choice([1, -1])
+                        matrix[i, j+rand] = 2
 
-                        elif j > 0 and j < m-1 and matrix[i, j+1] == 0: # Bottom occupied and right free
-                            matrix[i, j] = 0
-                            matrix[i, j+1] = 2
+                    elif j > 0 and j < m-1 and matrix[i, j+1] == 0: # Bottom occupied and right free
+                        matrix[i, j] = 0
+                        matrix[i, j+1] = 2
 
-                        elif j > 0 and j < m-1 and matrix[i, j-1] == 0: # Bottom occupied and left free
-                            matrix[i, j] = 0
-                            matrix[i, j-1] = 2
+                    elif j > 0 and j < m-1 and matrix[i, j-1] == 0: # Bottom occupied and left free
+                        matrix[i, j] = 0
+                        matrix[i, j-1] = 2
                     
 
                     
