@@ -191,6 +191,10 @@ while run:
                 cell_i = int(np.floor(mouse_y/square_size))
                 generators.append([cell_i, cell_j, selected_material])   
 
+
+
+        keys = pygame.key.get_pressed()
+
         if event.type == pygame.KEYDOWN:
             '''
             D key to eliminate the last generator created.
@@ -206,6 +210,9 @@ while run:
 
             if event.key == pygame.K_m:
                 draw_mouse = not draw_mouse
+
+            if keys[pygame.K_d] and keys[pygame.K_LCTRL]:
+                matrix = np.zeros((n, m))
         
     if frame_count % 5 == 0:
         ''''
