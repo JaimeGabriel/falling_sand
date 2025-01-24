@@ -4,7 +4,7 @@ Sand simulator made with python.
 
 ![Game screen](Graphics/captura.png)
 
-![Demo](Graphics/sand_simulator.gif)
+[YouTube video](https://www.youtube.com/shorts/qvoL3Gq4yl0)
 
 ## Install dependencies
 
